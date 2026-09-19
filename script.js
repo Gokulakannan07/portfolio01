@@ -1,56 +1,152 @@
-const header = document.getElementById("header");
-const menuBtn = document.getElementById("menuBtn");
-const navLinks = document.getElementById("navLinks");
-const navItems = document.querySelectorAll(".nav-link");
-const scrollProgress = document.getElementById("scrollProgress");
-const backToTop = document.getElementById("backToTop");
-const typingText = document.getElementById("typingText");
-const contactForm = document.getElementById("contactForm");
-const formMessage = document.getElementById("formMessage");
-const currentYear = document.getElementById("currentYear");
+
+
+const header =
+    document.getElementById("header");
+
+const menuBtn =
+    document.getElementById("menuBtn");
+
+const navLinks =
+    document.getElementById("navLinks");
+
+const navItems =
+    document.querySelectorAll(".nav-link");
+
+const scrollProgress =
+    document.getElementById("scrollProgress");
+
+const backToTop =
+    document.getElementById("backToTop");
+
+const typingText =
+    document.getElementById("typingText");
+
+const contactForm =
+    document.getElementById("contactForm");
+
+const formMessage =
+    document.getElementById("formMessage");
+
+const currentYear =
+    document.getElementById("currentYear");
 
 
 /* =========================================
    MOBILE MENU
 ========================================= */
 
-if (menuBtn && navLinks) {
+function closeMenu() {
 
-    menuBtn.addEventListener("click", () => {
+    if (!navLinks || !menuBtn) {
+        return;
+    }
 
-        const isOpen = navLinks.classList.toggle("active");
+    navLinks.classList.remove("active");
 
-        menuBtn.setAttribute(
-            "aria-expanded",
-            isOpen ? "true" : "false"
-        );
+    menuBtn.setAttribute(
+        "aria-expanded",
+        "false"
+    );
 
-        menuBtn.innerHTML = isOpen
-            ? '<i class="fas fa-xmark"></i>'
-            : '<i class="fas fa-bars"></i>';
+    menuBtn.setAttribute(
+        "aria-label",
+        "Open navigation menu"
+    );
 
-    });
+    menuBtn.innerHTML =
+        '<i class="fas fa-bars"></i>';
+}
 
 
-    navItems.forEach((item) => {
+function toggleMenu() {
 
-        item.addEventListener("click", () => {
+    if (!navLinks || !menuBtn) {
+        return;
+    }
 
-            navLinks.classList.remove("active");
+    const isOpen =
+        navLinks.classList.toggle("active");
 
-            menuBtn.setAttribute(
-                "aria-expanded",
-                "false"
-            );
+    menuBtn.setAttribute(
+        "aria-expanded",
+        String(isOpen)
+    );
 
-            menuBtn.innerHTML =
-                '<i class="fas fa-bars"></i>';
+    menuBtn.setAttribute(
+        "aria-label",
+        isOpen
+            ? "Close navigation menu"
+            : "Open navigation menu"
+    );
 
-        });
+    menuBtn.innerHTML = isOpen
+        ? '<i class="fas fa-xmark"></i>'
+        : '<i class="fas fa-bars"></i>';
+}
 
-    });
+
+if (menuBtn) {
+
+    menuBtn.addEventListener(
+        "click",
+        toggleMenu
+    );
 
 }
+
+
+navItems.forEach((item) => {
+
+    item.addEventListener(
+        "click",
+        closeMenu
+    );
+
+});
+
+
+/* Close menu when clicking outside */
+
+document.addEventListener(
+    "click",
+    (event) => {
+
+        if (!navLinks || !menuBtn) {
+            return;
+        }
+
+        const clickedInsideMenu =
+            navLinks.contains(event.target);
+
+        const clickedButton =
+            menuBtn.contains(event.target);
+
+        if (
+            navLinks.classList.contains("active") &&
+            !clickedInsideMenu &&
+            !clickedButton
+        ) {
+
+            closeMenu();
+
+        }
+
+    }
+);
+
+
+/* Close menu with Escape */
+
+document.addEventListener(
+    "keydown",
+    (event) => {
+
+        if (event.key === "Escape") {
+            closeMenu();
+        }
+
+    }
+);
 
 
 /* =========================================
@@ -59,9 +155,8 @@ if (menuBtn && navLinks) {
 
 function handleScroll() {
 
-    const scrollTop = window.scrollY;
-
-    /* Header */
+    const scrollTop =
+        window.scrollY;
 
     if (header) {
 
@@ -87,7 +182,7 @@ function handleScroll() {
                 : 0;
 
         scrollProgress.style.width =
-            `${progress}%`;
+            `${Math.min(progress, 100)}%`;
 
     }
 
@@ -104,8 +199,6 @@ function handleScroll() {
     }
 
 
-    /* Active Navigation */
-
     updateActiveNav();
 
 }
@@ -114,7 +207,9 @@ function handleScroll() {
 window.addEventListener(
     "scroll",
     handleScroll,
-    { passive: true }
+    {
+        passive: true
+    }
 );
 
 
@@ -125,19 +220,31 @@ window.addEventListener(
 function updateActiveNav() {
 
     const sections =
-        document.querySelectorAll("main section[id]");
+        document.querySelectorAll(
+            "main section[id]"
+        );
 
-    let currentSection = "home";
+    if (!sections.length) {
+        return;
+    }
+
+    let currentSection =
+        sections[0].id;
 
     const scrollPosition =
-        window.scrollY + 180;
+        window.scrollY + 200;
+
 
     sections.forEach((section) => {
 
-        const top = section.offsetTop;
+        if (
+            scrollPosition >=
+            section.offsetTop
+        ) {
 
-        if (scrollPosition >= top) {
-            currentSection = section.id;
+            currentSection =
+                section.id;
+
         }
 
     });
@@ -145,28 +252,28 @@ function updateActiveNav() {
 
     /* Bottom of page */
 
-    if (
+    const atBottom =
         window.innerHeight +
         window.scrollY >=
-        document.documentElement.scrollHeight - 10
-    ) {
+        document.documentElement.scrollHeight - 20;
 
-        const lastSection =
-            sections[sections.length - 1];
 
-        if (lastSection) {
-            currentSection = lastSection.id;
-        }
+    if (atBottom) {
+
+        currentSection =
+            sections[sections.length - 1].id;
 
     }
 
 
     navItems.forEach((item) => {
 
+        const target =
+            item.getAttribute("href");
+
         item.classList.toggle(
             "active",
-            item.getAttribute("href") ===
-            `#${currentSection}`
+            target === `#${currentSection}`
         );
 
     });
@@ -180,14 +287,17 @@ function updateActiveNav() {
 
 if (backToTop) {
 
-    backToTop.addEventListener("click", () => {
+    backToTop.addEventListener(
+        "click",
+        () => {
 
-        window.scrollTo({
-            top: 0,
-            behavior: "smooth"
-        });
+            window.scrollTo({
+                top: 0,
+                behavior: "smooth"
+            });
 
-    });
+        }
+    );
 
 }
 
@@ -200,12 +310,16 @@ if (typingText) {
 
     const roles = [
         "Web Developer",
-        "Java Developer"
+        "Java Developer",
+        "Full Stack Developer",
+        "Frontend Developer"
     ];
 
     let roleIndex = 0;
-    let charIndex = 0;
-    let deleting = false;
+
+    let characterIndex = 0;
+
+    let isDeleting = false;
 
 
     function typeEffect() {
@@ -214,23 +328,23 @@ if (typingText) {
             roles[roleIndex];
 
 
-        if (!deleting) {
+        if (!isDeleting) {
+
+            characterIndex++;
 
             typingText.textContent =
                 currentRole.substring(
                     0,
-                    charIndex + 1
+                    characterIndex
                 );
-
-            charIndex++;
 
 
             if (
-                charIndex ===
+                characterIndex ===
                 currentRole.length
             ) {
 
-                deleting = true;
+                isDeleting = true;
 
                 setTimeout(
                     typeEffect,
@@ -238,36 +352,47 @@ if (typingText) {
                 );
 
                 return;
-
             }
 
         } else {
 
+            characterIndex--;
+
             typingText.textContent =
                 currentRole.substring(
                     0,
-                    charIndex - 1
+                    characterIndex
                 );
 
-            charIndex--;
 
+            if (characterIndex === 0) {
 
-            if (charIndex === 0) {
-
-                deleting = false;
+                isDeleting = false;
 
                 roleIndex =
                     (roleIndex + 1) %
                     roles.length;
 
+                setTimeout(
+                    typeEffect,
+                    300
+                );
+
+                return;
             }
 
         }
 
 
+        const typingSpeed =
+            isDeleting
+                ? 45
+                : 85;
+
+
         setTimeout(
             typeEffect,
-            deleting ? 45 : 80
+            typingSpeed
         );
 
     }
@@ -279,51 +404,79 @@ if (typingText) {
 
 
 /* =========================================
-   REVEAL ANIMATION
+   SCROLL REVEAL
 ========================================= */
 
 const revealElements =
     document.querySelectorAll(
-        ".skill-card, .project-card, .certificate-card, .about-content, .about-image, .contact-item, .contact-form"
+        [
+            ".skill-card",
+            ".project-card",
+            ".certificate-card",
+            ".about-content",
+            ".about-image",
+            ".contact-item",
+            ".contact-form"
+        ].join(", ")
     );
 
 
-const revealObserver =
-    new IntersectionObserver(
-        (entries, observer) => {
+if (
+    "IntersectionObserver" in window
+) {
 
-            entries.forEach((entry) => {
+    const revealObserver =
+        new IntersectionObserver(
+            (entries, observer) => {
 
-                if (!entry.isIntersecting) {
-                    return;
-                }
+                entries.forEach((entry) => {
 
-                entry.target.style.opacity = "1";
-                entry.target.style.transform = "translateY(0)";
-
-                observer.unobserve(entry.target);
-
-            });
-
-        },
-        {
-            threshold: 0.12
-        }
-    );
+                    if (
+                        !entry.isIntersecting
+                    ) {
+                        return;
+                    }
 
 
-revealElements.forEach((element) => {
+                    entry.target.classList.add(
+                        "visible"
+                    );
 
-    element.style.opacity = "0";
-    element.style.transform =
-        "translateY(25px)";
 
-    element.style.transition =
-        "opacity 0.7s ease, transform 0.7s ease";
+                    observer.unobserve(
+                        entry.target
+                    );
 
-    revealObserver.observe(element);
+                });
 
-});
+            },
+            {
+                threshold: 0.12,
+                rootMargin:
+                    "0px 0px -50px 0px"
+            }
+        );
+
+
+    revealElements.forEach((element) => {
+
+        element.classList.add("reveal");
+
+        revealObserver.observe(element);
+
+    });
+
+} else {
+
+    revealElements.forEach((element) => {
+
+        element.classList.add(
+            "visible"
+        );
+
+    });
+
+}
 
 
 /* =========================================
@@ -339,17 +492,33 @@ if (contactForm) {
             event.preventDefault();
 
 
+            const nameInput =
+                document.getElementById("name");
+
+            const emailInput =
+                document.getElementById("email");
+
+            const messageInput =
+                document.getElementById("message");
+
+
             const name =
-                document.getElementById("name")?.value.trim();
+                nameInput?.value.trim() || "";
 
             const email =
-                document.getElementById("email")?.value.trim();
+                emailInput?.value.trim() || "";
 
             const message =
-                document.getElementById("message")?.value.trim();
+                messageInput?.value.trim() || "";
 
 
-            if (!name || !email || !message) {
+            /* Empty fields */
+
+            if (
+                !name ||
+                !email ||
+                !message
+            ) {
 
                 showFormMessage(
                     "Please fill in all fields.",
@@ -357,30 +526,75 @@ if (contactForm) {
                 );
 
                 return;
-
             }
 
+
+            /* Email validation */
 
             const emailPattern =
                 /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 
-            if (!emailPattern.test(email)) {
+            if (
+                !emailPattern.test(email)
+            ) {
 
                 showFormMessage(
                     "Please enter a valid email address.",
                     "error"
                 );
 
-                return;
+                emailInput?.focus();
 
+                return;
             }
 
 
+            /* Message validation */
+
+            if (message.length < 10) {
+
+                showFormMessage(
+                    "Please enter a message with at least 10 characters.",
+                    "error"
+                );
+
+                messageInput?.focus();
+
+                return;
+            }
+
+
+            /*
+             * Opens the visitor's email application.
+             */
+
+            const receiver =
+                "kannancse777@gmail.com";
+
+
+            const subject =
+                encodeURIComponent(
+                    `Portfolio Contact from ${name}`
+                );
+
+
+            const body =
+                encodeURIComponent(
+                    `Name: ${name}\n\n` +
+                    `Email: ${email}\n\n` +
+                    `Message:\n${message}`
+                );
+
+
             showFormMessage(
-                "Thank you! Your message is ready to be sent.",
+                "Opening your email application...",
                 "success"
             );
+
+
+            window.location.href =
+                `mailto:${receiver}?subject=${subject}&body=${body}`;
 
 
             contactForm.reset();
@@ -391,6 +605,10 @@ if (contactForm) {
 }
 
 
+/* =========================================
+   FORM MESSAGE
+========================================= */
+
 function showFormMessage(
     message,
     type
@@ -400,10 +618,33 @@ function showFormMessage(
         return;
     }
 
-    formMessage.textContent = message;
+
+    formMessage.textContent =
+        message;
+
 
     formMessage.className =
         `form-message ${type}`;
+
+
+    clearTimeout(
+        showFormMessage.timer
+    );
+
+
+    showFormMessage.timer =
+        setTimeout(
+            () => {
+
+                formMessage.textContent =
+                    "";
+
+                formMessage.className =
+                    "form-message";
+
+            },
+            5000
+        );
 
 }
 
@@ -418,6 +659,90 @@ if (currentYear) {
         new Date().getFullYear();
 
 }
+
+
+/* =========================================
+   SMOOTH ANCHOR LINKS
+========================================= */
+
+document
+    .querySelectorAll('a[href^="#"]')
+    .forEach((link) => {
+
+        link.addEventListener(
+            "click",
+            (event) => {
+
+                const targetId =
+                    link.getAttribute("href");
+
+
+                if (
+                    !targetId ||
+                    targetId === "#"
+                ) {
+                    return;
+                }
+
+
+                const target =
+                    document.querySelector(
+                        targetId
+                    );
+
+
+                if (!target) {
+                    return;
+                }
+
+
+                event.preventDefault();
+
+
+                const headerHeight =
+                    header
+                        ? header.offsetHeight
+                        : 0;
+
+
+                const targetPosition =
+                    target.getBoundingClientRect()
+                        .top +
+                    window.scrollY -
+                    headerHeight;
+
+
+                window.scrollTo({
+                    top: Math.max(
+                        targetPosition,
+                        0
+                    ),
+                    behavior: "smooth"
+                });
+
+
+                closeMenu();
+
+            }
+        );
+
+    });
+
+
+/* =========================================
+   RESIZE
+========================================= */
+
+window.addEventListener(
+    "resize",
+    () => {
+
+        if (window.innerWidth > 768) {
+            closeMenu();
+        }
+
+    }
+);
 
 
 /* =========================================
