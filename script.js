@@ -309,10 +309,7 @@ if (backToTop) {
 if (typingText) {
 
     const roles = [
-        "Web Developer",
-        "Java Developer",
-        "Full Stack Developer",
-        "Frontend Developer"
+        "Web Developer"
     ];
 
     let roleIndex = 0;
